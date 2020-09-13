@@ -134,18 +134,33 @@ class conn:
 parser = argparse.ArgumentParser(description="quickly connect to campus network.")
 parser.add_argument("-i", "--id", type=str, help="your school userId")
 parser.add_argument("-p", "--password", type=str, help="your password")
-parser.add_argument("-s", "--service", type=str, help="select one in [campus, telecom, mobile, union] (default: union)")
+parser.add_argument("-s", "--service", type=str, choices=['campus', 'telecom', 'mobile', 'union'], default='union',
+                    help="select the service provider (default: union)")
+parser.add_argument("-q", "--quit", action="store_true", help="disconnect campus network")
+parser.add_argument("-l", "--loop", action="store_true", help="loop check network status and auto connect")
+parser.add_argument("-t", "--time", type=int, default=720, help="loop check delay ms (default: 720s)")
 args = parser.parse_args()
-
-if not args.service:
-    args.service = 'union'
 
 print(args)
 
 pi = conn(id=args.id, passwd=args.password, service=args.service)
-query = pi.ifnoconfig()
 
-if query:
-    pi.connect()
+
+def start():
+    query = pi.ifnoconfig()
+    if query:
+        pi.connect()
+    else:
+        localtime = time.asctime(time.localtime(time.time()))
+        print('[%s]: 网络已连接' % localtime)
+
+
+if args.quit:
+    pi.disconnect()
+
+if args.loop:
+    while True:
+        start()
+        time.sleep(args.time)
 else:
-    print('网络已连接')
+    start()
