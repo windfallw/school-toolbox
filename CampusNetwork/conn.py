@@ -3,6 +3,7 @@ import argparse
 import time
 import json
 import re
+import os
 
 header = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/80.0',
@@ -66,7 +67,6 @@ class conn:
     def __init__(self, id, passwd, service='union'):
         """
         I like union, so the default setting of service is union. :P
-
         :param id: your school userId
         :param passwd: your secret
         :param service: campus telecom mobile union
@@ -106,6 +106,23 @@ class conn:
         else:
             return False
 
+    def checkConnection(self):
+        """
+        ping 10.100.1.5测速连通性，防止树莓派比路由器更早开机或校园网验证服务器并未启动。
+        """
+        try:
+            res = os.system("ping 10.100.1.5")
+            if res == 1:
+                print("\nping 10.100.1.5 失败。您的设备可能尚未接入互联网或不在校园网环境内。")
+                return False
+            else:
+                print("\nping 10.100.1.5 成功！您正处于校园网环境内。")
+                return True
+        except BaseException as e:
+            print(e, "\nping 10.100.1.5 失败。")
+            return False
+        
+
     def connect(self):
         """
         执行登录校园网之前需要先通过ifnoconfig()获取最新的queryString。
@@ -139,6 +156,8 @@ parser.add_argument("-s", "--service", type=str, choices=['campus', 'telecom', '
 parser.add_argument("-q", "--quit", action="store_true", help="disconnect campus network")
 parser.add_argument("-l", "--loop", action="store_true", help="loop check network status and auto connect")
 parser.add_argument("-t", "--time", type=int, default=720, help="loop check delay ms (default: 720s)")
+parser.add_argument("-cc", "--checkConnection", action="store_true", 
+                    help="check whether the equipment is in the campus network or whether the equipment is connected to the network")
 args = parser.parse_args()
 
 print(args)
@@ -147,6 +166,16 @@ pi = conn(id=args.id, passwd=args.password, service=args.service)
 
 
 def start():
+    # check whether the equipment is in the campus network or whether the equipment is connected to the network
+    connectionFlag = pi.checkConnection()
+    print(connectionFlag)
+    while(connectionFlag == False):
+        localtime = time.asctime(time.localtime(time.time()))
+        print("[%s]: 您不在校园网环境内或尚未联网。将在60秒后重试……" % localtime)
+        time.sleep(60)
+        connectionFlag = pi.checkConnection()
+    
+    # check whether logged in
     query = pi.ifnoconfig()
     if query:
         pi.connect()
@@ -158,9 +187,14 @@ def start():
 if args.quit:
     pi.disconnect()
 
+if args.checkConnection:
+    pi.checkConnection()
+    exit()
+
 if args.loop:
     while True:
         start()
         time.sleep(args.time)
 else:
     start()
+
