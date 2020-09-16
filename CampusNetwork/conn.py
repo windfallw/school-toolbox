@@ -1,5 +1,6 @@
 import requests
 import argparse
+import logging
 import time
 import json
 import re
@@ -7,6 +8,14 @@ import re
 header = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:80.0) Gecko/20100101 Firefox/80.0',
 }
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s  %(filename)s : %(levelname)s  %(message)s',
+    datefmt='%Y-%m-%d %A %H:%M:%S',
+    filename='conn.log',
+    filemode='w'
+)
 
 
 class getHtmlElement:
@@ -116,11 +125,11 @@ class conn:
         if msg['result'] == 'success':
             self.userIndex['userIndex'] = msg['userIndex']
             print(self.userIndex)
-            print('网络连接成功')
+            logging.warning('网络连接成功')
         elif msg['result'] == 'fail':
-            print('网络连接失败原因：%s' % msg['message'])
+            logging.warning('网络连接失败：%s' % msg['message'])
         else:
-            print('未知状态：%s' % msg['message'])
+            logging.error('未知状态：%s' % msg['message'])
 
     def disconnect(self):
         """
@@ -138,10 +147,8 @@ parser.add_argument("-s", "--service", type=str, choices=['campus', 'telecom', '
                     help="select the service provider (default: union)")
 parser.add_argument("-q", "--quit", action="store_true", help="disconnect campus network")
 parser.add_argument("-l", "--loop", action="store_true", help="loop check network status and auto connect")
-parser.add_argument("-t", "--time", type=int, default=720, help="loop check delay ms (default: 720s)")
+parser.add_argument("-t", "--time", type=int, default=300, help="loop check delay ms (default: 300s)")
 args = parser.parse_args()
-
-print(args)
 
 pi = conn(id=args.id, passwd=args.password, service=args.service)
 
@@ -151,8 +158,7 @@ def start():
     if query:
         pi.connect()
     else:
-        localtime = time.asctime(time.localtime(time.time()))
-        print('[%s]: 网络已连接' % localtime)
+        logging.info('网络已连接')
 
 
 if args.quit:
@@ -160,7 +166,13 @@ if args.quit:
 
 if args.loop:
     while True:
-        start()
-        time.sleep(args.time)
+        try:
+            start()
+            time.sleep(args.time)
+        except OSError:
+            time.sleep(args.time // 2)
+        except Exception as error:
+            logging.error(error)
+
 else:
     start()

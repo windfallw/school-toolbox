@@ -32,13 +32,11 @@
   autorestart=true
   stopasgroup=true
   killasgroup=true
-  stdout_logfile = /home/share/status.log # 正常输出日志存放的位置
-  stderr_logfile = /home/share/error.log # 错误日志
   ```
 
   `supervisorctl reload`
   
-  然后就可以尝试着把网线拔掉重接，看看有没有自动认证了。默认每 `720s` 检查一次，可自行调整。
+  然后就可以尝试着把网线拔掉重接，看看有没有自动认证了。默认每 `300s` 检查一次，可自行调整。
   
 - 如果刚好这么巧，你的校园网登录界面和下面的长得一模一样，后台IP地址是`10.100.1.5`的话可以试试看。
 
