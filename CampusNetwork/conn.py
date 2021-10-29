@@ -100,9 +100,9 @@ class conn:
         print(response.status_code)
         print(response.content.decode('utf-8', 'ignore'))
 
-    def ifnoconfig(self):
+    def ifconfig(self):
         """
-        正如函数名，如果没有登录的话返回True，已经登录了返回False。
+        如果没有登录的话返回False，已经登录了返回True。
         通过正则表达式提取重定向的url，而这个url刚好包含了queryString，正是登录校园网所必须的关键字段。
         """
         res = requests.get(self.url, headers=header)
@@ -111,9 +111,9 @@ class conn:
         if len(redirect_url) >= 1:
             redirect_url = redirect_url[0]
             self.payload['queryString'] = redirect_url.split('?')[1]
-            return True
-        else:
             return False
+        else:
+            return True
 
     def connect(self):
         """
@@ -154,8 +154,8 @@ pi = conn(id=args.id, passwd=args.password, service=args.service)
 
 
 def start():
-    query = pi.ifnoconfig()
-    if query:
+    query = pi.ifconfig()
+    if not query:
         pi.connect()
     else:
         logging.info('网络已连接')
