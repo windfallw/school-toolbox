@@ -147,6 +147,7 @@ parser.add_argument("-s", "--service", type=str, choices=['campus', 'telecom', '
                     help="select the service provider (default: union)")
 parser.add_argument("-q", "--quit", action="store_true", help="disconnect campus network")
 parser.add_argument("-l", "--loop", action="store_true", help="loop check network status and auto connect")
+parser.add_argument("-d", "--detail", action="store_true", help="show online user info")
 parser.add_argument("-t", "--time", type=int, default=300, help="loop check delay ms (default: 300s)")
 args = parser.parse_args()
 
@@ -160,6 +161,9 @@ def start():
     else:
         logging.info('网络已连接')
 
+
+if args.detail:
+    pi.getOnlineUserInfo()
 
 if args.quit:
     pi.disconnect()
