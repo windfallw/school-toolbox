@@ -50,11 +50,12 @@ class conn:
     login = 'http://10.100.1.5/eportal/InterFace.do?method=login'  # 登录网页
     logout = 'http://10.100.1.5/eportal/InterFace.do?method=logout'  # 退出网页
 
+    # use urllib.parse.quote_plus to encode character first
     service = {
         'campus': '%E6%A0%A1%E5%9B%AD%E7%BD%91',
         'telecom': '%E4%B8%AD%E5%9B%BD%E7%94%B5%E4%BF%A1',
         'mobile': '%E4%B8%AD%E5%9B%BD%E7%A7%BB%E5%8A%A8',
-        'union': '%E4%B8%AD%E5%9B%BD%E8%81%94%E9%80%9A'
+        'unicom': '%E4%B8%AD%E5%9B%BD%E8%81%94%E9%80%9A'
     }
 
     payload = {
@@ -72,13 +73,13 @@ class conn:
         'userIndex': ''
     }
 
-    def __init__(self, id, passwd, service='union'):
+    def __init__(self, id, passwd, service='unicom'):
         """
-        I like union, so the default setting of service is union. :P
+        I like unicom, so the default service is unicom. :P
 
         :param id: your school userId
         :param passwd: your secret
-        :param service: campus telecom mobile union
+        :param service: campus telecom mobile unicom
         """
         self.payload['userId'] = id
         self.payload['password'] = passwd
@@ -143,8 +144,8 @@ class conn:
 parser = argparse.ArgumentParser(description="quickly connect to campus network.")
 parser.add_argument("-i", "--id", type=str, help="your school userId")
 parser.add_argument("-p", "--password", type=str, help="your password")
-parser.add_argument("-s", "--service", type=str, choices=['campus', 'telecom', 'mobile', 'union'], default='union',
-                    help="select the service provider (default: union)")
+parser.add_argument("-s", "--service", type=str, choices=['campus', 'telecom', 'mobile', 'unicom'], default='unicom',
+                    help="select the service provider (default: unicom)")
 parser.add_argument("-q", "--quit", action="store_true", help="disconnect campus network")
 parser.add_argument("-l", "--loop", action="store_true", help="loop check network status and auto connect")
 parser.add_argument("-d", "--detail", action="store_true", help="show online user info")

@@ -1,0 +1,4 @@
+config campusnetwork 'config'
+    option userId 'userId'
+    option password 'password'
+    option service 'unicom'  # (campus, telecom, mobile, unicom)
